@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Elvira Raeva](https://up.htmlacademy.ru/ecmascript-individual/2/user/2152009).
-* Наставник: `Неизвестно`.
+* Наставник: `Роман Марченко`.
 
 ---
 
