@@ -1,12 +1,12 @@
 import ListPresenter from './presenter/list-presenter.js';
-import NewTripInfoView from './view/trip-info-view.js';
-import NewFiltersView from './view/filters-view.js';
-import { render } from './render.js';
-import { RenderPosition } from './render.js';
+import HeaderTripPresenter from './presenter/header-trip-presenter.js';
+
 const headerTrip = document.querySelector('.trip-main');
-const tripControlsFilter = document.querySelector('.trip-controls__filters');
 const tripEvents = document.querySelector('.trip-events');
+
+const headerTripPresenter = new HeaderTripPresenter({headerContainer:headerTrip});
 const listPresenter = new ListPresenter({ listContainer: tripEvents });
-render(new NewTripInfoView(), headerTrip, RenderPosition.AFTERBEGIN);
-render(new NewFiltersView(),tripControlsFilter,RenderPosition.BEFOREEND);
+
+
+headerTripPresenter.init();
 listPresenter.init();
