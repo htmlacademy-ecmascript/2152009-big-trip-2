@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { DATE_FORMAT,HOURS_FORMAT,getTimeDifference,getHumanizeTaskDueDate} from '../utils.js';
 function createOfferOfPointTemplate(offers){
   const {title,price} = offers;
@@ -47,26 +47,29 @@ function createPointOfListTemplate(point,offers,destinations) {
   </li>`
   );
 }
-export default class PointOfListView {
-  constructor({point,offers,destinations}){
-    this.point = point;
-    this.offers = offers;
-    this.destinations = destinations;
+export default class PointOfListView extends AbstractView{
+  #point = null;
+  #offers = null;
+  #destinations = null;
+  #handleEditClick = null;
+
+  constructor({point,offers,destinations,onEditClick}){
+    super();
+    this.#point = point;
+    this.#offers = offers;
+    this.#destinations = destinations;
+    this.#handleEditClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click',this.#editClickHandler);
   }
 
-  getTemplate() {
-    return createPointOfListTemplate(this.point,this.offers,this.destinations);
+  get template() {
+    return createPointOfListTemplate(this.#point,this.#offers,this.#destinations);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #editClickHandler = (evt) =>{
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
 }

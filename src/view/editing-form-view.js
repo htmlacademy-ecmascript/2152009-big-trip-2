@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {FULL_DATE_FORMAT,getHumanizeTaskDueDate} from '../utils.js';
 function createOffersOfPointTemplate(offers, checkedOffers) {
   const { title, price, id } = offers;
@@ -137,27 +137,36 @@ function createEditingFormTemplate(point,checkedOffers,offers,destinations) {
               </form>
             </li>`);
 }
-export default class EditingFormView {
-  constructor({point,checkedOffers,offers,destinations}){
-    this.point = point;
-    this.checkedOffers = checkedOffers;
-    this.offers = offers;
-    this.destinations = destinations;
+export default class EditingFormView extends AbstractView{
+  #point = null;
+  #checkedOffers = null;
+  #offers = null;
+  #destinations = null;
+  #handleFormSubmit = null;
+  #handleEditClick = null;
+  constructor({point,checkedOffers,offers,destinations,onFormSubmit, onClickCloseEditForm}){
+    super();
+    this.#point = point;
+    this.#checkedOffers = checkedOffers;
+    this.#offers = offers;
+    this.#destinations = destinations;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleEditClick = onClickCloseEditForm;
+    this.element.querySelector('form').addEventListener('submit',this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click',this.#editCloseClickHandler);
   }
 
-  getTemplate() {
-    return createEditingFormTemplate(this.point,this.checkedOffers,this.offers,this.destinations);
+  get template() {
+    return createEditingFormTemplate(this.#point,this.#checkedOffers,this.#offers,this.#destinations);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #formSubmitHandler = (evt) =>{
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editCloseClickHandler = (evt) =>{
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }
