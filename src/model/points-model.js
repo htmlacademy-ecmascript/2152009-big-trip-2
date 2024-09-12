@@ -1,7 +1,7 @@
 import { mockDestinations } from '../mock/destinations.js';
 import { mockOffers } from '../mock/offers.js';
 import getRandomPoint from '../mock/points.js';
-const POINTS_COUNT = 3;
+const POINTS_COUNT = 25;
 export default class PointsModel{
   #points = Array.from({length: POINTS_COUNT}, getRandomPoint);
   #offers = mockOffers;
