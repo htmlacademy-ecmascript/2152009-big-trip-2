@@ -1,11 +1,15 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {FULL_DATE_FORMAT,getHumanizeTaskDueDate} from '../utils.js';
+import { FULL_DATE_FORMAT, getHumanizeTaskDueDate } from '../utils/point.js';
 function createOffersOfPointTemplate(offers, checkedOffers) {
   const { title, price, id } = offers;
-  const isChecked = checkedOffers.some((checkedOffer) => checkedOffer.id === id);
+  const isChecked = checkedOffers.some(
+    (checkedOffer) => checkedOffer.id === id
+  );
   return `
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" ${isChecked ? 'checked' : ''}>
+      <input class="event__offer-checkbox visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" ${
+  isChecked ? 'checked' : ''
+}>
       <label class="event__offer-label" for="event-offer-luggage-${id}">
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
@@ -14,10 +18,10 @@ function createOffersOfPointTemplate(offers, checkedOffers) {
     </div>
   `;
 }
-function createEditingFormTemplate(point,checkedOffers,offers,destinations) {
-  const {basePrice,dateFrom,dateTo,type} = point;
-  const {name,description,pictures,id} = destinations;
-  return (`<li class="trip-events__item">
+function createEditingFormTemplate(point, checkedOffers, offers, destinations) {
+  const { basePrice, dateFrom, dateTo, type } = point;
+  const { name, description, pictures, id } = destinations;
+  return `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
                 <header class="event__header">
                   <div class="event__type-wrapper">
@@ -93,10 +97,16 @@ function createEditingFormTemplate(point,checkedOffers,offers,destinations) {
 
                   <div class="event__field-group  event__field-group--time">
                     <label class="visually-hidden" for="event-start-time-1">From</label>
-                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${getHumanizeTaskDueDate(dateFrom,FULL_DATE_FORMAT)}">
+                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${getHumanizeTaskDueDate(
+    dateFrom,
+    FULL_DATE_FORMAT
+  )}">
                     &mdash;
                     <label class="visually-hidden" for="event-end-time-1">To</label>
-                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${getHumanizeTaskDueDate(dateTo,FULL_DATE_FORMAT)}">
+                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${getHumanizeTaskDueDate(
+    dateTo,
+    FULL_DATE_FORMAT
+  )}">
                   </div>
 
                   <div class="event__field-group  event__field-group--price">
@@ -118,33 +128,51 @@ function createEditingFormTemplate(point,checkedOffers,offers,destinations) {
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                     <div class="event__available-offers">
-                      ${offers.map((offer)=>createOffersOfPointTemplate(offer, checkedOffers)).join(' ')}
+                      ${offers
+    .map((offer) =>
+      createOffersOfPointTemplate(offer, checkedOffers)
+    )
+    .join(' ')}
                   </section>
 
                   <section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
                     <p class="event__destination-description">${description}</p>
-                   ${pictures.length > 0 ? `
+                   ${
+  pictures.length > 0
+    ? `
   <div class="event__photos-container">
     <div class="event__photos-tape">
-      ${pictures.map((picture) =>
-      `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
-    ).join('')}
+      ${pictures
+    .map(
+      (picture) =>
+        `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
+    )
+    .join('')}
     </div>
-  </div>` : ''}
+  </div>`
+    : ''
+}
                   </section>
                 </section>
               </form>
-            </li>`);
+            </li>`;
 }
-export default class EditingFormView extends AbstractView{
+export default class EditingFormView extends AbstractView {
   #point = null;
   #checkedOffers = null;
   #offers = null;
   #destinations = null;
   #handleFormSubmit = null;
   #handleEditClick = null;
-  constructor({point,checkedOffers,offers,destinations,onFormSubmit, onClickCloseEditForm}){
+  constructor({
+    point,
+    checkedOffers,
+    offers,
+    destinations,
+    onFormSubmit,
+    onClickCloseEditForm,
+  }) {
     super();
     this.#point = point;
     this.#checkedOffers = checkedOffers;
@@ -152,20 +180,29 @@ export default class EditingFormView extends AbstractView{
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleEditClick = onClickCloseEditForm;
-    this.element.querySelector('form').addEventListener('submit',this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click',this.#editCloseClickHandler);
+    this.element
+      .querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editCloseClickHandler);
   }
 
   get template() {
-    return createEditingFormTemplate(this.#point,this.#checkedOffers,this.#offers,this.#destinations);
+    return createEditingFormTemplate(
+      this.#point,
+      this.#checkedOffers,
+      this.#offers,
+      this.#destinations
+    );
   }
 
-  #formSubmitHandler = (evt) =>{
+  #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit();
   };
 
-  #editCloseClickHandler = (evt) =>{
+  #editCloseClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleEditClick();
   };
