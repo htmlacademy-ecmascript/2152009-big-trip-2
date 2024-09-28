@@ -15,4 +15,8 @@ const TextNoPoint = {
   past:'There are no past events now',
   future:'There are no future events now'
 };
-export {HOURS_IN_DAY,MILLISECONDS_IN_MINUTE,SECONDS_IN_MINUTE,MINUTES_IN_HOUR,FilterType,TextNoPoint};
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+export {HOURS_IN_DAY,MILLISECONDS_IN_MINUTE,SECONDS_IN_MINUTE,MINUTES_IN_HOUR,FilterType,TextNoPoint,Mode};

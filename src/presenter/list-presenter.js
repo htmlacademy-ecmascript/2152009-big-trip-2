@@ -1,90 +1,85 @@
-
-import { render,replace,RenderPosition } from '../framework/render.js';
+import { render, RenderPosition } from '../framework/render.js';
 import { generateFilter } from '../mock/filter.js';
+import { updateItem } from '../utils/common.js';
 import ListView from '../view/list-view.js';
 import SortingView from '../view/sorting-view.js';
-import PointOfListView from '../view/point-of-list-view.js';
-import EditingFormView from '../view/editing-form-view.js';
 import NoPointView from '../view/no-point-view.js';
 import FiltersView from '../view/filters-view.js';
-/*отрисовка отфильтрованных компонентов не реализована,так как данный модуль этого не
-предусматривает,отрисовка отфильтрованных компонентов предусмотрена в 7 модуле с помощью паттерна наблюдателя */
+import PointPresenter from './point-presenter.js';
+
 const tripControlsFilter = document.querySelector('.trip-controls__filters');
 export default class ListPresenter {
   #listComponent = new ListView();
+  #sortingComponent = new SortingView();
+  #noPointComponent = new NoPointView();
   #pointsModel = null;
   #listContainer = null;
   #filtersComponent = null;
   #pointList = [];
-  constructor({ listContainer,pointsModel }) {
+  #pointPresenters = new Map();
+
+  constructor({ listContainer, pointsModel }) {
     this.#listContainer = listContainer;
     this.#pointsModel = pointsModel;
     this.filters = generateFilter(this.#pointsModel.points);
-    this.#filtersComponent = new FiltersView({ filters: this.filters,});
+    this.#filtersComponent = new FiltersView({ filters: this.filters });
   }
 
   init() {
-    render(this.#filtersComponent,tripControlsFilter,RenderPosition.BEFOREEND);
+    this.#renderFilters();
     this.#pointList = [...this.#pointsModel.points];
     this.#renderList();
-    //console.log(this.filters.find((item)=>item.type==='future').filteredPoints)
   }
 
-  #addKeydownListener(replacePointToForm,escKeyDownHandler){
-    replacePointToForm();
-    document.addEventListener('keydown', escKeyDownHandler);
+  #renderFilters() {
+    render(
+      this.#filtersComponent,
+      tripControlsFilter,
+      RenderPosition.BEFOREEND
+    );
   }
 
-  #addOnFormSubmit(replaceFormToPoint,escKeyDownHandler){
-    replaceFormToPoint();
-    document.removeEventListener('keydown', escKeyDownHandler);
-  }
+  #handlePointChange = (updatePoint) => {
+    this.#pointList = updateItem(this.#pointList, updatePoint);
+    this.#pointPresenters.get(updatePoint.id).init(updatePoint);
+  };
 
-  #renderPoint(pointItem){
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
-    const pointComponent = new PointOfListView({
-      point: pointItem,
-      offers:[...this.#pointsModel.getOffersById(pointItem.type,pointItem.offers)],
-      destinations: this.#pointsModel.getDestinationsById(pointItem.destination),
-      onEditClick: () => {
-        this.#addKeydownListener(replacePointToForm,escKeyDownHandler);
-      }
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => {
+      presenter.resetView();
     });
-    const pointEditComponent = new EditingFormView({
-      point:pointItem,
-      checkedOffers:[...this.#pointsModel.getOffersById(pointItem.type,pointItem.offers)],
-      offers:[...this.#pointsModel.getOffersByType(pointItem.type)],
-      destinations: this.#pointsModel.getDestinationsById(pointItem.destination),
-      onFormSubmit: () => {
-        this.#addOnFormSubmit(replaceFormToPoint,escKeyDownHandler);
-      },
-      onClickCloseEditForm:()=>{
-        replaceFormToPoint();
-      }
-    });
-    function replacePointToForm() {
-      replace(pointEditComponent, pointComponent);
-    }
+  };
 
-    function replaceFormToPoint() {
-      replace(pointComponent, pointEditComponent);
-    }
-    render(pointComponent,this.#listComponent.element);
+  #renderSortingComponent() {
+    render(this.#sortingComponent, this.#listContainer);
   }
 
-  #renderList(){
-    render(new SortingView(), this.#listContainer);
+  #renderNoPointComponent() {
+    render(this.#noPointComponent, this.#listComponent.element);
+  }
+
+  #renderPoint(point) {
+    const pointPresenter = new PointPresenter({
+      pointContainer: this.#listComponent.element,
+      pointsModel: this.#pointsModel,
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange,
+    });
+    this.#pointPresenters.set(point.id, pointPresenter);
+    pointPresenter.init(point);
+  }
+
+  #clearPointList() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+  }
+
+  #renderList() {
+    this.#renderSortingComponent();
     render(this.#listComponent, this.#listContainer);
 
-    if (this.#pointList.length === 0){
-      render(new NoPointView(),this.#listComponent.element);
+    if (this.#pointList.length === 0) {
+      this.#renderNoPointComponent();
       return;
     }
     for (let i = 0; i < this.#pointList.length; i++) {
